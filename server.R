@@ -32,24 +32,28 @@ shinyServer(function(input, output) {
   
   # Raster Tools (Map Algebra, Map Statistics, Plots) DROPDOW
    # Map Algebra PAGE
-    # Select files for left side of algebra
     output$LeftSide <- renderUI({
-      selectInput(inputId = "leftAlgebra",
-                  label = "Select Files",
-                  choices = input$AddMap[ ,1],
-                  multiple = TRUE)
+      # Select files for left side of algebra
+      selectInput(
+        inputId = "leftAlgebra",
+        label = "Select Files",
+        choices = input$AddMap[ ,1],
+        multiple = TRUE
+      )
     })
   
-    # Select files for right side of algebra
     output$RightSide <- renderUI({
-      selectInput(inputId = "rightAlgebra",
-                  label = "Select Files",
-                  choices = "suitability",
-                  multiple = TRUE)
+      # Select files for right side of algebra
+      selectInput(
+        inputId = "rightAlgebra",
+        label = "Select Files",
+        choices = "suitability",
+        multiple = TRUE
+      )
     })
   
-    # Shows the raster
     output$testPlot <- renderPlot({
+      # Shows the raster
       if(!is.null(suitability())){
         other <- suitability()
         fileList[[2]] <<- mask(fileList[[2]], other)
@@ -58,24 +62,25 @@ shinyServer(function(input, output) {
     })
   
    # Map Statistics
-    # Displays histogram
     output$bar.plot <- renderPlot({
+      # Displays histogram
       addRasterToList()
       if(!is.null(input$AddMap) && hasValues(toUse <- raster(fileList[[2]], layer = mapChoice()))){
-        barplot(stretch(toUse),
-                border = TRUE,
-                # main = title,
-                xlab = "Value",
-                ylab = "Frequency",
-                col = "black",
-                # digits = NULL,
-                breaks = 255
+        barplot(
+          stretch(toUse),
+          border = TRUE,
+          # main = title,
+          xlab = "Value",
+          ylab = "Frequency",
+          col = "black",
+          # digits = NULL,
+          breaks = 255
         )
       }
     })
   
-    # Displays map parameters
     output$mapParam <- renderUI({
+      # Displays map parameters
       if(!is.null(input$AddMap) && hasValues(map <- raster(fileList[[2]], layer = mapChoice()))){
         map.columns <- paste("Columns: ", ncol(map))
         map.rows <- paste("Rows: ", nrow(map))
@@ -89,8 +94,8 @@ shinyServer(function(input, output) {
         HTML(paste("Columns:", "Rows:", "X Lower Left:", "Y Lower Left:", "Cell Size:", sep = '<br/>'))
     })
   
-    # Displays map statistics
     output$mapStats <- renderText({
+      # Displays map statistics
       if(!is.null(input$AddMap) && hasValues(map <- raster(fileList[[2]], layer = mapChoice()))){
         map.min <- paste("Minimum: ", prettyNum(cellStats(map, "min"), drop0trailinng = TRUE, digits = 6))
         map.max <- paste("Maximum: ", prettyNum(cellStats(map, "max"), drop0trailinng = TRUE, digits = 6))
@@ -105,48 +110,52 @@ shinyServer(function(input, output) {
         HTML(paste("Minimum:", "Maximum:", "Mean:", "Standard Deviation:", "Cell Count:", "Cell Sum:", sep = '<br/>'))
     })
   
-    # Select option for which layer to display
     output$SelectLayer <- renderUI({
+      # Select option for which layer to display
       if(!is.null(input$AddMap)){
-        selectInput(inputId = "LayerSelect", 
-                    label = "Select map to use", 
-                    choices = input$AddMap[, 1])
+        selectInput(
+          inputId = "LayerSelect", 
+          label = "Select map to use", 
+          choices = input$AddMap[, 1]
+        )
       }
     })
     outputOptions(output, 'SelectLayer', suspendWhenHidden=FALSE)
   
    # Plots
-     # Plot all plots in the fileList in Plots page
      output$AllPlots <- renderPlot({
+       # Plot all plots in the fileList in Plots page
        hist(stretch(fileList[[2]]))
      })
   
   # Model Evaluation
-    # Plot the raster for Model Evaluation
     output$FirstRaster <- renderPlot({
+      # Plot the raster for Model Evaluation
       if(!is.null(input$SuitMap) && !is.null(input$YCoord)){
         toUseSuit <- raster(input$SuitMap[1, 4])
-        plot(toUseSuit,
-             xlab = input$XCoord,
-             ylab = input$YCoord
+        plot(
+          toUseSuit,
+           xlab = input$XCoord,
+           ylab = input$YCoord
         )
       }
     })
   
-    #Plot the modified raster for Model Evaluation
     output$GeneratedRaster <- renderPlot({
+      # Plot the modified raster for Model Evaluation
       if(!is.null(input$DataFiles)){
         toUseSuit <- suitability()
-        plot(toUseSuit,
-             xlab = input$XCoord,
-             ylab = input$YCoord,
-             col = "black"
+        plot(
+          toUseSuit,
+          xlab = input$XCoord,
+          ylab = input$YCoord,
+          col = "black"
         )
       }
     })
   
-    #Typeahead box for chosing which plant to use, in Model Evaluatoin
     output$PlantTypeAhead <- renderUI({
+      # Typeahead box for chosing which plant to use, in Model Evaluatoin
       textInput.typeahead(
         id = "PlantInput",
         placeholder = "Plant common name",
@@ -161,10 +170,11 @@ shinyServer(function(input, output) {
     # Choose the XCoord variable in Map Eval page in datafile
     output$XCoord <- renderUI({
       if(!is.null(input$DataFiles)){
-        selectInput(inputId = "XCoord",
-                    label = "X Field:",
-                    choices = names(dataFile()),
-                    multiple = FALSE
+        selectInput(
+          inputId = "XCoord",
+          label = "X Field:",
+          choices = names(dataFile()),
+          multiple = FALSE
         )
       }
     })
@@ -172,17 +182,25 @@ shinyServer(function(input, output) {
     # Choose the YCoord variable in Map Eval page from datafile
     output$YCoord <- renderUI({
       if(!is.null(input$DataFiles)){
-        selectInput(inputId = "YCoord",
-                    label = "Y Field:",
-                    choices = names(dataFile()),
-                    multiple = FALSE
+        selectInput(
+          inputId = "YCoord",
+          label = "Y Field:",
+          choices = names(dataFile()),
+          multiple = FALSE
         )
       }
     })
   
-  #End menu items
+  # End menu items, functions below
   
-  #Takes files uploaded and converts them to raster stack
+  # CSV of locations of chosen plan for Model Evaluation
+  chosenPlant <- reactive({
+    if(!is.null(thePlant <- input$PlantTypeAhead)){
+      plantLocations <- plantDB[grep(" ", plantDB$)]
+    }
+  })
+  
+  # Takes files uploaded and converts them to raster stack
   addRasterToList <- reactive({
     if(!is.null(input$AddMap)){
       for(i in 1:nrow(input$AddMap)){
@@ -192,31 +210,13 @@ shinyServer(function(input, output) {
     }
   })
   
-#   addFileToList <- function(x){
-#     fileList[1] <- cbind(fileList[1], x)
-#   }
-  
-#   #Variable for the raster stack, reactive only to: readRaster, useMask, Weight
-#   mapInput <- reactive({
-#     if(!is.null(input$AddMap)){
-#       if(input$useMask == TRUE && !is.null(input$AddMask) == TRUE){
-#         mask(fileList[2], raster(input$AddMask[1,4]))
-#       }
-#       weight <- input$Weight
-#       #theStack <- calc(theStack, fun = function(x){x*weight})
-#       return (theRaster)
-#     }
-#   })
-  
-  #Variable for choice of map to display, reactive only to: LayerSelect, AddMap
+  # Variable for choice of map to display, reactive only to: LayerSelect, AddMap
   mapChoice <- reactive({
     if(!is.null(input$AddMap)){
-#       for(j in 1:nlayers(fileList[[2]])){
-        for(j in 1:nrow(input$AddMap)){
-          test1 <- input$LayerSelect
-          test2 <- fileList[[3]]
+      for(j in 1:nrow(input$AddMap)){
+        test1 <- input$LayerSelect
+        test2 <- fileList[[3]]
         if(identical(input$LayerSelect, input$AddMap[j,1]) == TRUE){
-        #if(isTRUE(all.equal(input$LayerSelect, raster(fileList[[2]], layer = j), use.names = TRUE))){
             return(j)
         }
       }
@@ -238,8 +238,4 @@ shinyServer(function(input, output) {
     theCSV <- read.csv(input$DataFiles[1,4])
     return (theCSV)
   })
-
-
-
-
 })
