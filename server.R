@@ -173,7 +173,7 @@ shinyServer(function(input, output) {
         selectInput(
           inputId = "XCoord",
           label = "X Field:",
-          choices = names(dataFile()),
+          choices = names(chosenPlant()),
           multiple = FALSE
         )
       }
@@ -185,7 +185,7 @@ shinyServer(function(input, output) {
         selectInput(
           inputId = "YCoord",
           label = "Y Field:",
-          choices = names(dataFile()),
+          choices = names(chosenPlant()),
           multiple = FALSE
         )
       }
@@ -196,7 +196,7 @@ shinyServer(function(input, output) {
   # CSV of locations of chosen plan for Model Evaluation
   chosenPlant <- reactive({
     if(!is.null(thePlant <- input$PlantTypeAhead)){
-      plantLocations <- plantDB[grep(" ", plantDB$)]
+      plantLocations <- subset(plantDB, Common_Name == thePlant)
     }
   })
   
@@ -226,7 +226,7 @@ shinyServer(function(input, output) {
   suitability <- reactive({
     if(!is.null(input$XCoord) && !is.null(input$YCoord)){
       theRaster <- raster(input$SuitMap[1, 4])
-      theData <- as.data.table(dataFile())
+      theData <- as.data.table(chosenPlant())
       theData <- theData[ , c(input$XCoord, input$YCoord), with = FALSE]
       theRaster <- rasterize(theData, theRaster)
       theRaster <- as.logical(theRaster)
