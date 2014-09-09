@@ -147,11 +147,11 @@ shinyUI(
                                           offset = 1
                                    ),
                                    column(2,
-                                          fileInput(inputId = "DataFiles",
-                                                    label = "Data Files",
-                                                    multiple = FALSE,
-                                                    accept = NULL
-                                                    ),
+#                                           fileInput(inputId = "DataFiles",
+#                                                     label = "Data Files",
+#                                                     multiple = FALSE,
+#                                                     accept = NULL
+#                                                     ),
                                           HTML("OR"),
                                           htmlOutput("PlantTypeAhead"),
                                           htmlOutput("XCoord"),

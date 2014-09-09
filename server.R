@@ -143,7 +143,7 @@ shinyServer(function(input, output) {
   
     output$GeneratedRaster <- renderPlot({
       # Plot the modified raster for Model Evaluation
-      if(!is.null(input$DataFiles)){
+      if(!is.null(input$PlantInput)){
         toUseSuit <- suitability()
         plot(
           toUseSuit,
@@ -169,9 +169,10 @@ shinyServer(function(input, output) {
   
     # Choose the XCoord variable in Map Eval page in datafile
     output$XCoord <- renderUI({
-      if(!is.null(input$DataFiles)){
+      if(!is.null(input$PlantInput)){
         selectInput(
           inputId = "XCoord",
+          selected = "Longitude_",
           label = "X Field:",
           choices = names(chosenPlant()),
           multiple = FALSE
@@ -181,9 +182,10 @@ shinyServer(function(input, output) {
     
     # Choose the YCoord variable in Map Eval page from datafile
     output$YCoord <- renderUI({
-      if(!is.null(input$DataFiles)){
+      if(!is.null(input$PlantInput)){
         selectInput(
           inputId = "YCoord",
+          selected = "Latitude_D",
           label = "Y Field:",
           choices = names(chosenPlant()),
           multiple = FALSE
@@ -195,8 +197,8 @@ shinyServer(function(input, output) {
   
   # CSV of locations of chosen plan for Model Evaluation
   chosenPlant <- reactive({
-    if(!is.null(thePlant <- input$PlantTypeAhead)){
-      plantLocations <- subset(plantDB, Common_Name == thePlant)
+    if(!is.null(input$PlantInput)){
+      plantLocations <- subset(plantDB, Common_Name == input$PlantInput)
     }
   })
   
