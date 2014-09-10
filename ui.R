@@ -152,8 +152,9 @@ shinyUI(
 #                                                     multiple = FALSE,
 #                                                     accept = NULL
 #                                                     ),
-                                          HTML("OR"),
+                                          HTML("Choose Plant"),
                                           htmlOutput("PlantTypeAhead"),
+                                          br(),
                                           htmlOutput("XCoord"),
                                           htmlOutput("YCoord"),
                                           br(),

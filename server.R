@@ -5,8 +5,9 @@
 # http://shiny.rstudio.com
 #
 
-#server.R
+# server.R
 
+# Libraries
 library(shiny)
 library(raster)
 library(rasterVis)
@@ -17,11 +18,15 @@ library(reshape2)
 library(ggplot2)
 library(shinysky)
 
+# Global Options 
 rasterOptions(standardnames = FALSE)
+
+# Initialize fileList to hold all uploaded files; each dimention is a different type
 list1 <- list("")
 list2 <- vector()
 fileList <<- list(list1, stack(), list2)
 
+# Load weedmapper file holding locations for plants in OREGON
 plantDB <- fread("data/Pure_weedmapper_data.csv")
 setkey(plantDB, Common_Name)
 
@@ -143,7 +148,7 @@ shinyServer(function(input, output) {
   
     output$GeneratedRaster <- renderPlot({
       # Plot the modified raster for Model Evaluation
-      if(!is.null(input$PlantInput)){
+      if(!is.null(input$PlantInput) && !is.null(input$SuitMap)){
         toUseSuit <- suitability()
         plot(
           toUseSuit,
@@ -167,8 +172,8 @@ shinyServer(function(input, output) {
       )
     })
   
-    # Choose the XCoord variable in Map Eval page in datafile
     output$XCoord <- renderUI({
+      # Choose the XCoord variable in Map Eval page in datafile
       if(!is.null(input$PlantInput)){
         selectInput(
           inputId = "XCoord",
@@ -180,8 +185,8 @@ shinyServer(function(input, output) {
       }
     })
     
-    # Choose the YCoord variable in Map Eval page from datafile
     output$YCoord <- renderUI({
+      # Choose the YCoord variable in Map Eval page from datafile
       if(!is.null(input$PlantInput)){
         selectInput(
           inputId = "YCoord",
@@ -195,15 +200,15 @@ shinyServer(function(input, output) {
   
   # End menu items, functions below
   
-  # CSV of locations of chosen plan for Model Evaluation
   chosenPlant <- reactive({
+    # CSV of locations of chosen plan for Model Evaluation
     if(!is.null(input$PlantInput)){
       plantLocations <- subset(plantDB, Common_Name == input$PlantInput)
     }
   })
   
-  # Takes files uploaded and converts them to raster stack
   addRasterToList <- reactive({
+    # Takes files uploaded and converts them to raster stack
     if(!is.null(input$AddMap)){
       for(i in 1:nrow(input$AddMap)){
         fileList[[2]] <<- addLayer(fileList[[2]], raster(input$AddMap[i,4]))
@@ -212,8 +217,8 @@ shinyServer(function(input, output) {
     }
   })
   
-  # Variable for choice of map to display, reactive only to: LayerSelect, AddMap
   mapChoice <- reactive({
+    # Variable for choice of map to display, reactive only to: LayerSelect, AddMap
     if(!is.null(input$AddMap)){
       for(j in 1:nrow(input$AddMap)){
         test1 <- input$LayerSelect
@@ -226,17 +231,18 @@ shinyServer(function(input, output) {
   })
   
   suitability <- reactive({
-    if(!is.null(input$XCoord) && !is.null(input$YCoord)){
+    # Returns a raster from CSV points provied by the weedmapper data of the selected plant
+    if(!is.null(input$XCoord) && !is.null(input$YCoord) && !is.null(input$SuitMap)){
       theRaster <- raster(input$SuitMap[1, 4])
       theData <- as.data.table(chosenPlant())
       theData <- theData[ , c(input$XCoord, input$YCoord), with = FALSE]
       theRaster <- rasterize(theData, theRaster)
-      theRaster <- as.logical(theRaster)
-      return (theRaster)
+      return (as.logical(theRaster))
     }
   })
   
   dataFile <- reactive({
+    # Reads file of the uploaded datafile, an alternative to the typeahead
     theCSV <- read.csv(input$DataFiles[1,4])
     return (theCSV)
   })
