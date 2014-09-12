@@ -27,7 +27,7 @@ list2 <- vector()
 fileList <<- list(list1, stack(), list2)
 
 # Load weedmapper file holding locations for plants in OREGON
-plantDB <- fread("data/Pure_weedmapper_data.csv")
+plantDB <- fread("data/Pure_weedmapper_data.csv", verbose = TRUE)
 setkey(plantDB, Common_Name)
 
 shinyServer(function(input, output) {
@@ -130,7 +130,14 @@ shinyServer(function(input, output) {
    # Plots
      output$AllPlots <- renderPlot({
        # Plot all plots in the fileList in Plots page
-       hist(stretch(fileList[[2]]))
+       if(nlayers(fileList[[2]])!=0){
+        histogram(stretch(fileList[[2]]))
+       }
+     })
+   
+     output$UploadFilesText <- renderText({
+       if(nlayers(fileList[[2]]) == 0)
+         HTML(paste("Add raster maps through the Map Statstics page."))
      })
   
   # Model Evaluation
