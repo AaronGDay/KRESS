@@ -244,6 +244,7 @@ shinyServer(function(input, output) {
       theData <- as.data.table(chosenPlant())
       theData <- theData[ , c(input$XCoord, input$YCoord), with = FALSE]
       theRaster <- rasterize(theData, theRaster)
+      names(theRaster) <- input$PlantInput
       return (as.logical(theRaster))
     }
   })
