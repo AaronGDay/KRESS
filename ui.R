@@ -139,9 +139,13 @@ shinyUI(
         "Plots",
         fluidPage(
           title = "Plots",
+          htmlOutput("UploadFilesText"),
           column(
-            12,
-            htmlOutput("UploadFilesText"),
+            3,
+            htmlOutput("ShowSelectedPlots")
+          ),
+          column(
+            9,
             plotOutput("AllPlots")
           )
         )

@@ -128,14 +128,27 @@ shinyServer(function(input, output) {
     outputOptions(output, 'SelectLayer', suspendWhenHidden=FALSE)
   
    # Plots
+    output$ShowSelectedPlots <- renderUI({
+      #Allows the user to select which rasters they wish to plot
+      if(nlayers(fileList[[2]]) != 0){
+        selectInput(
+          inputId = "SelectedPlots",
+          label = "Plots to show:",
+          choices = names(fileList[[2]]),
+          multiple = TRUE
+        )
+      }
+    })
+   
      output$AllPlots <- renderPlot({
-       # Plot all plots in the fileList in Plots page
-       if(nlayers(fileList[[2]])!=0){
-        histogram(stretch(fileList[[2]]))
+        # Plot all plots in the fileList in Plots page
+        if(nlayers(fileList[[2]])!=0){
+          histogram(stretch(fileList[[2]]))
        }
      })
    
      output$UploadFilesText <- renderText({
+       # Shows following text if there are no raster files uploaded
        if(nlayers(fileList[[2]]) == 0)
          HTML(paste("Add raster maps through the Map Statstics page."))
      })
