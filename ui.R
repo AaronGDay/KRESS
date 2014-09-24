@@ -11,6 +11,8 @@ library(shiny)
 library(raster)
 library(rasterVis)
 library(ggplot2)
+library(shinyIncubator)
+library(shinysky)
 
 shinyUI(
   navbarPage(
@@ -94,6 +96,7 @@ shinyUI(
             title = "Map Statistics",
             h4("Map Statistics"),
             hr(),
+            busyIndicator(text = "Creating Histogram", wait = 1500),
             plotOutput("bar.plot"),
             hr(),
             column(
@@ -146,6 +149,7 @@ shinyUI(
           ),
           column(
             9,
+            busyIndicator(text = "Creating Histograms"),
             plotOutput("AllPlots")
           )
         )

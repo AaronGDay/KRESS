@@ -8,15 +8,19 @@
 # server.R
 
 # Libraries
-library(shiny)
 library(raster)
 library(rasterVis)
+
 library(rgdal)
 library(rgl)
 library(data.table)
+
 library(reshape2)
 library(ggplot2)
+
+library(shiny)
 library(shinysky)
+library(shinyIncubator)
 
 # Global Options 
 rasterOptions(standardnames = FALSE)
@@ -30,7 +34,7 @@ fileList <<- list(list1, stack(), list2)
 plantDB <- fread("data/Pure_weedmapper_data.csv", verbose = TRUE)
 setkey(plantDB, Common_Name)
 
-shinyServer(function(input, output) {
+shinyServer(function(input, output, session) {
   
   # Home PAGE
    # No server.R material
@@ -83,7 +87,7 @@ shinyServer(function(input, output) {
         )
       }
     })
-  
+   
     output$mapParam <- renderUI({
       # Displays map parameters
       if(!is.null(input$AddMap) && hasValues(map <- raster(fileList[[2]], layer = mapChoice()))){
@@ -142,10 +146,11 @@ shinyServer(function(input, output) {
    
      output$AllPlots <- renderPlot({
         # Plot all plots in the fileList in Plots page
-        if(nlayers(fileList[[2]])!=0){
+        if(nlayers(fileList[[2]]) != 0){
           histogram(stretch(fileList[[2]]))
        }
      })
+   outputOptions(output, 'AllPlots', suspendWhenHidden=FALSE)
    
      output$UploadFilesText <- renderText({
        # Shows following text if there are no raster files uploaded
@@ -222,9 +227,9 @@ shinyServer(function(input, output) {
   
   chosenPlant <- reactive({
     # CSV of locations of chosen plan for Model Evaluation
-    if(!is.null(input$PlantInput)){
+    #if(!is.null(input$PlantInput)){
       plantLocations <- subset(plantDB, Common_Name == input$PlantInput)
-    }
+    #}
   })
   
   addRasterToList <- reactive({
