@@ -111,7 +111,7 @@ shinyServer(function(input, output, session) {
         map.mean <- paste("Mean: ", prettyNum(cellStats(map, "mean"), drop0trailinng = TRUE, digits = 8))
         map.sd <- paste("Standard Deviation: ", prettyNum(cellStats(map, "sd"), drop0trailing = TRUE, digits = 8))
         map.cell.count <- paste("Cell Count: ", ncell(map)-cellStats(map, "countNA"))
-        map.cell.sum <- paste("Cell Sum: ", prettyNum(cellStats(map, "sum"),drop0trailinng = TRUE, digits = 8))
+        map.cell.sum <- paste("Cell Sum: ", prettyNum(cellStats(map, "sum"),drop0trailing = TRUE, digits = 8))
         
         HTML(paste(map.min, map.max, map.mean, map.sd, map.cell.count, map.cell.sum, sep = '<br/>'))
       }
@@ -129,34 +129,35 @@ shinyServer(function(input, output, session) {
         )
       }
     })
-    outputOptions(output, 'SelectLayer', suspendWhenHidden=FALSE)
+    outputOptions(output, 'SelectLayer', suspendWhenHidden = FALSE)
   
    # Plots
     output$ShowSelectedPlots <- renderUI({
       #Allows the user to select which rasters they wish to plot
-      if(nlayers(fileList[[2]]) != 0){
+      if(nlayers(fileListReactive()) != 0){
         selectInput(
           inputId = "SelectedPlots",
           label = "Plots to show:",
-          choices = names(fileList[[2]]),
+          choices = names(fileListReactive()),
           multiple = TRUE
         )
       }
     })
    
-     output$AllPlots <- renderPlot({
-        # Plot all plots in the fileList in Plots page
-        if(nlayers(fileList[[2]]) != 0){
-          histogram(stretch(fileList[[2]]))
-       }
-     })
-   outputOptions(output, 'AllPlots', suspendWhenHidden=FALSE)
+    output$AllPlots <- renderPlot({
+      # Plot all plots in the fileList in Plots page
+      if(nlayers(fileListReactive()) != 0 && !is.null(input$AddMap))
+        histogram(stretch(fileListReactive()))
+    })
+    outputOptions(output, 'AllPlots', suspendWhenHidden = FALSE)
    
-     output$UploadFilesText <- renderText({
-       # Shows following text if there are no raster files uploaded
-       if(nlayers(fileList[[2]]) == 0)
-         HTML(paste("Add raster maps through the Map Statstics page."))
-     })
+    output$UploadFilesText <- renderText({
+      # Shows following text if there are no raster files uploaded
+      if(nlayers(fileList[2]) == 0)
+        HTML(paste("Add raster maps through the Map Statstics page."))
+      else
+        HTML(paste("change"))
+    })
   
   # Model Evaluation
     output$FirstRaster <- renderPlot({
@@ -227,9 +228,9 @@ shinyServer(function(input, output, session) {
   
   chosenPlant <- reactive({
     # CSV of locations of chosen plan for Model Evaluation
-    #if(!is.null(input$PlantInput)){
+    if(!is.null(input$PlantInput)){
       plantLocations <- subset(plantDB, Common_Name == input$PlantInput)
-    #}
+    }
   })
   
   addRasterToList <- reactive({
@@ -239,6 +240,13 @@ shinyServer(function(input, output, session) {
         fileList[[2]] <<- addLayer(fileList[[2]], raster(input$AddMap[i,4]))
         fileList[[3]] <<- append(fileList[3], input$AddMap[i,1])
       }
+    }
+  })
+  
+  fileListReactive <- reactive({
+    if(!is.null(fileList[[2]])){
+      toReturn <- fileList[[2]]
+      return(toReturn)
     }
   })
   
