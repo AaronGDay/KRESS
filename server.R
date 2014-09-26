@@ -153,7 +153,7 @@ shinyServer(function(input, output, session) {
    
     output$UploadFilesText <- renderText({
       # Shows following text if there are no raster files uploaded
-      if(nlayers(fileList[2]) == 0)
+      if(nlayers(stack(fileList[[2]])) == 0)
         HTML(paste("Add raster maps through the Map Statstics page."))
       else
         HTML(paste("change"))
