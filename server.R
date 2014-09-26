@@ -146,17 +146,23 @@ shinyServer(function(input, output, session) {
    
     output$AllPlots <- renderPlot({
       # Plot all plots in the fileList in Plots page
-      if(nlayers(fileListReactive()) != 0 && !is.null(input$AddMap))
-        histogram(stretch(fileListReactive()))
+      addRasterToList()
+      if(nlayers(stack(fileList[[2]])) != 0){
+        histogram(stretch(fileList[[2]]))
+      }
+      else
+        plot(nlayers(stack(fileList[[2]])))
     })
     outputOptions(output, 'AllPlots', suspendWhenHidden = FALSE)
    
     output$UploadFilesText <- renderText({
       # Shows following text if there are no raster files uploaded
-      if(nlayers(stack(fileList[[2]])) == 0)
+      if(nlayers(stack(fileList[[2]])) == 0){
+        addRasterToList()
         HTML(paste("Add raster maps through the Map Statstics page."))
+      }
       else
-        HTML(paste("change"))
+        HTML(paste(nlayers(stack(fileList[[2]]))))
     })
   
   # Model Evaluation
@@ -246,7 +252,7 @@ shinyServer(function(input, output, session) {
   fileListReactive <- reactive({
     if(!is.null(fileList[[2]])){
       toReturn <- fileList[[2]]
-      return(toReturn)
+      return(stack(toReturn))
     }
   })
   
