@@ -145,7 +145,8 @@ shinyUI(
           htmlOutput("UploadFilesText"),
           column(
             3,
-            htmlOutput("ShowSelectedPlots")
+            htmlOutput("ShowSelectedPlots"),
+            actionButton("changePlots", "Apply")
           ),
           column(
             9,

@@ -31,7 +31,7 @@ list2 <- vector()
 fileList <<- list(list1, stack(), list2)
 
 # Load weedmapper file holding locations for plants in OREGON
-plantDB <- fread("data/Pure_weedmapper_data.csv", verbose = TRUE)
+plantDB <<- fread("data/Pure_weedmapper_data.csv", verbose = TRUE)
 setkey(plantDB, Common_Name)
 
 shinyServer(function(input, output, session) {
@@ -134,11 +134,12 @@ shinyServer(function(input, output, session) {
    # Plots
     output$ShowSelectedPlots <- renderUI({
       #Allows the user to select which rasters they wish to plot
-      if(nlayers(fileListReactive()) != 0){
+      addRasterToList()
+      if(nlayers(stack(fileList[[2]])) != 0){
         selectInput(
           inputId = "SelectedPlots",
           label = "Plots to show:",
-          choices = names(fileListReactive()),
+          choices = names(fileList[[2]]),
           multiple = TRUE
         )
       }
@@ -147,11 +148,12 @@ shinyServer(function(input, output, session) {
     output$AllPlots <- renderPlot({
       # Plot all plots in the fileList in Plots page
       addRasterToList()
-      if(nlayers(stack(fileList[[2]])) != 0){
-        histogram(stretch(fileList[[2]]))
-      }
+      input$changePlots
+      if(nlayers(stack(fileList[[2]])) != 0 && !is.null(input$ShowSelectedPlots))
+        #histogram(stretch(raster(fileList[[2]], layer = input$ShowSelectedPlots)))
+        plot(2)
       else
-        plot(nlayers(stack(fileList[[2]])))
+        plot(1)
     })
     outputOptions(output, 'AllPlots', suspendWhenHidden = FALSE)
    
@@ -161,8 +163,6 @@ shinyServer(function(input, output, session) {
         addRasterToList()
         HTML(paste("Add raster maps through the Map Statstics page."))
       }
-      else
-        HTML(paste(nlayers(stack(fileList[[2]]))))
     })
   
   # Model Evaluation
